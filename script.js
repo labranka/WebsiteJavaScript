@@ -179,7 +179,7 @@ const sectionObserver = new IntersectionObserver(revealSection, {
 
 allSections.forEach(function (section) {
   sectionObserver.observe(section);
-  //section.classList.add('section--hidden');
+  section.classList.add('section--hidden');
 });
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -191,14 +191,14 @@ const loadImg = function (entries, observer) {
 
   if (!entry.isIntersecting) return;
 
-  //Replace src with data-src
+  // Replace src with data-src
   entry.target.src = entry.target.dataset.src;
 
   entry.target.addEventListener('load', function () {
     entry.target.classList.remove('lazy-img');
   });
 
-  observe.unobserve(entry.target);
+  observer.unobserve(entry.target);
 };
 
 const imgObserver = new IntersectionObserver(loadImg, {
@@ -209,204 +209,89 @@ const imgObserver = new IntersectionObserver(loadImg, {
 
 imgTargets.forEach(img => imgObserver.observe(img));
 
+//////////////////////////////////////////////////////////////
 //SLIDER
-const slides = document.querySelectorAll('.slide');
-const btnLeft = document.querySelector('.slider__btn--left');
-const btnRight = document.querySelector('.slider__btn--right');
 
-let curSlide = 0;
-const maxSlide = slides.length - 1;
+const slider = function () {
+  const slides = document.querySelectorAll('.slide');
+  const btnLeft = document.querySelector('.slider__btn--left');
+  const btnRight = document.querySelector('.slider__btn--right');
+  const dotContainer = document.querySelector('.dots');
 
-const slider = document.querySelector('.slider');
-slider.style.transform = 'scale(0.4) translateX(-800px)';
-slider.style.overflow = 'visible';
+  let curSlide = 0;
+  const maxSlide = slides.length;
 
-slides.forEach((s, i) => (s.style.transform = `translateX(${100 * i}%)`));
+  //FUNTIONS
+  const createDots = function () {
+    slides.forEach((_, i) => {
+      dotContainer.insertAdjacentHTML(
+        'beforeend',
+        `<button class="dots__dot" data-slide="${i}"></button>`
+      );
+    });
+  };
 
-//%0
-//%100
-//%200
-//%300
+  const goToSlide = function (slide) {
+    slides.forEach(
+      (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+    );
+  };
 
-//Next slide
-btnRight.addEventListener('click', function () {
-  if (curSlide === maxSlide) {
-    curSlide = 0;
-  } else {
-    curSlide++;
-  }
+  const activateDot = function (slide) {
+    document
+      .querySelectorAll('.dots__dot')
+      .forEach(dot => dot.classList.remove('dots__dot--active'));
 
-  slides.forEach(
-    (s, i) => (s.style.transform = `translateX(${100 * (i - curSlide)}%)`)
-  );
-});
-//curSlide = 1: %-100, %0, %100, %200
+    document
+      .querySelector(`.dots__dot[data-slide="${slide}"]`)
+      .classList.add('dots__dot--active');
+  };
 
-////////////////////////////////////////////////////
-///////////////////////////////////////////////////
-////////////////////////////////////////////////////
-/////////////////////////////////////////////////////
-/////////////////////////////////
-//Lekcije
-/////////////////////////////////
+  //Next slide
+  const nextSlide = function () {
+    if (curSlide === maxSlide - 1) {
+      curSlide = 0;
+    } else {
+      curSlide++;
+    }
 
-// //Event Listeners
-// ////////////////////////]
+    goToSlide(curSlide);
+    activateDot(curSlide);
+  };
 
-// const h1 = document.querySelector('h1');
+  const prevSlide = function () {
+    if (curSlide === 0) {
+      curSlide = maxSlide - 1;
+    } else {
+      curSlide--;
+    }
+    goToSlide(curSlide);
+    activateDot(curSlide);
+  };
 
-// const alertH1 = function (e) {
-//   alert('addEventListener: Great! You are reading the heading :D');
-// };
+  const init = function () {
+    goToSlide(0);
+    createDots();
+    activateDot(0);
+  };
 
-// h1.addEventListener('mouseenter', alertH1);
+  init();
 
-// setTimeout(() => h1.removeEventListener('mouseenter', alertH1), 3000);
+  //////EVENT HANDLERS
+  btnRight.addEventListener('click', nextSlide);
+  btnLeft.addEventListener('click', prevSlide);
 
-//Propagation in practice
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') prevSlide();
+    e.key === 'ArrowRight' && nextSlide(); // ovo je isto
+  });
 
-// const randomInt = (min, max) =>
-//   Math.floor(Math.random() * (max - min + 1) + min);
-// const randomColor = () =>
-//   `rgb(${randomInt(0, 255)},${randomInt(0, 255)},${randomInt(0, 255)})`;
-
-// document.querySelector('.nav__link').addEventListener('click', function (e) {
-//   this.style.backgroundColor = randomColor();
-//   console.log('LINK', e.target, e.currentTarget);
-
-//   //stop propagation
-//   //e.stopPropagation();
-// });
-
-// document.querySelector('.nav__links').addEventListener('click', function (e) {
-//   this.style.backgroundColor = randomColor();
-//   console.log('CONTAINER', e.target, e.currentTarget);
-// });
-
-// document.querySelector('.nav').addEventListener(
-//   'click',
-//   function (e) {
-//     this.style.backgroundColor = randomColor();
-//     console.log('NAV', e.target, e.currentTarget);
-//   },
-//   false
-// );
-
-// h1.onmouseenter = function (e) {
-//   alert('addEventListener: Great! You are reading the heading :D');
-// };
-
-//Selecting, Creating and Deleting Elements
-
-// //Selecting
-// console.log(document.documentElement); //selektujem ceo dokument
-
-// console.log(document.head);
-// console.log(document.body);
-
-// const header = document.querySelector('.header');
-// const allSections = document.querySelectorAll('.section');
-// console.log(allSections);
-
-// document.getElementById('#section--1');
-// const allButtons = document.getElementsByTagName('button'); //vraca HTML kolekciju
-// console.log(allButtons);
-
-// console.log(document.getElementsByClassName('btn'));
-
-// //Creating and inserting elements
-// //insertAdjacentHTML;
-
-// const message = document.createElement('div');
-// message.classList.add('cookie-message');
-// message.textContent =
-//   'We use cookies for improved functionality and analytics.';
-// message.innerHTML =
-//   'We use cookies for improved functionality and analytics. <button class="btn btn--close-cookie">Got it!</button>';
-
-// // header.prepend(message);
-// header.append(message);
-// // header.append(message.cloneNode(true));
-
-//header.before(message);
-// header.after(message);
-
-// //Delete elements
-// document
-//   .querySelector('.btn--close-cookie')
-//   .addEventListener('click', function () {
-//     message.remove();
-//     // message.parentElement.removeChild(message);
-//   });
-
-/////////////////
-//style, attributs and classes
-
-//Syles
-// message.style.backgroundColor = '#37383d';
-// message.style.width = '120%';
-
-// console.log(message.style.color);
-// console.log(message.style.backgroundColor);
-
-// console.log(getComputedStyle(message).color);
-// console.log(getComputedStyle(message).height);
-
-// message.style.height =
-//   Number.parseFloat(getComputedStyle(message).height, 10) + 25 + 'px';
-
-// document.documentElement.style.setProperty('--color-primary', 'orangered');
-
-//Attributes
-// const logo = document.querySelector('.nav__logo');
-// console.log(logo.alt);
-// console.log(logo.src);
-
-// logo.setAttribute('company', 'Bankist');
-
-// console.log(logo.src);
-// console.log(logo.getAttribute('src'));
-
-// //Data attributes
-// console.log(logo.dataset.versionNumber);
-
-// //Classes
-// logo.classList.add('c');
-// logo.classList.remove('c');
-// logo.classList.toogle('');
-// logo.classList.contains('');
-
-// //ne koristiti jer je ovveridovati sve klase
-// logo.className = 'branka';
-
-// //DOM tranvesting
-// const h1 = document.querySelector('h1');
-
-// //Going downwards: child
-// console.log(h1.querySelectorAll('.highlight'));
-// console.log(h1.childNodes); //sva deca elementa h1
-// console.log(h1.children);
-// h1.firstElementChild.style.color = 'white';
-// h1.lastElementChild.style.color = 'pink';
-
-// //Going upwards: parents
-// console.log(h1.parentNode);
-// console.log(h1.parentElement);
-// //kada trazim udaljenog parenta
-// h1.closest('.header').style.background = 'var(--gradient-secondary)';
-
-// h1.closest('h1').style.background = 'var(--gradient-primary)';
-
-// //Going sideways: siblings
-// console.log(h1.previousElementSibling);
-// console.log(h1.nextElementSibling);
-
-// console.log(h1.previousSibling);
-// console.log(h1.nextSibling);
-
-// console.log(h1.parentElement.children);
-// [...h1.parentElement.children].forEach(function (el) {
-//   if (el !== h1) {
-//     el.style.transform = 'scale(0.5)';
-//   }
-// });
+  dotContainer.addEventListener('click', function (e) {
+    if (e.target.classList.contains('dots__dot')) {
+      const { slide } = e.target.dataset;
+      goToSlide(slide);
+      activateDot(slide);
+    }
+  });
+};
+slider();
